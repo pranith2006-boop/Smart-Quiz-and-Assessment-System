@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Quiz - Smart Quiz System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .progress {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .score {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .question-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .option.correct {
+            border-color: #2ed573;
+            background: #2ed573;
+            color: white;
+        }
+
+        .option.wrong {
+            border-color: #ff4757;
+            background: #ff4757;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.primary {
+            background: #667eea;
+        }
+
+        .nav-btn.primary:hover:not(:disabled) {
+            background: #5a6fd8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .message {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-btn {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Quiz Section -->
+        <div id="quizSection">
+            <h1>HTML Fundamentals Quiz</h1>
+            
+            <div class="quiz-header">
+                <div class="progress" id="progressText">Question 1 of 10</div>
+                <div class="score">Score: <span id="currentScore">0</span></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-text" id="questionText">
+                    <!-- Question will be inserted here -->
+                </div>
+                
+                <div class="options-container" id="optionsContainer">
+                    <!-- Options will be inserted here -->
+                </div>
+                
+                <div class="feedback" id="feedback">
+                    <!-- Feedback will be shown here -->
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" id="prevBtn" onclick="previousQuestion()" disabled>
+                    Previous
+                </button>
+                
+                <button class="nav-btn primary" id="nextBtn" onclick="nextQuestion()">
+                    Next Question
+                </button>
+                
+                <button class="nav-btn primary hidden" id="submitBtn" onclick="submitQuiz()">
+                    Submit Quiz
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="results-container">
+                <h1>Quiz Completed! 🎉</h1>
+                <div class="score-display" id="finalScore">0/10</div>
+                <div class="message" id="resultMessage">
+                    <!-- Result message will be inserted here -->
+                </div>
+                <div class="action-buttons">
+                    <button class="btn" onclick="restartQuiz()">Take Quiz Again</button>
+                    <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Questions
+        const quizQuestions = [
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hyper Text Markup Language",
+                    "High Tech Modern Language",
+                    "Home Tool Markup Language",
+                    "Hyperlink and Text Markup Language"
+                ],
+                correctAnswer: 0,
+                explanation: "HTML stands for Hyper Text Markup Language, which is the standard markup language for creating web pages."
+            },
+            {
+                question: "Which HTML element is used for the largest heading?",
+                options: [
+                    "<heading>",
+                    "<h1>",
+                    "<head>",
+                    "<h6>"
+                ],
+                correctAnswer: 1,
+                explanation: "<h1> is used for the largest heading, while <h6> is used for the smallest heading."
+            },
+            {
+                question: "What is the correct HTML for creating a hyperlink?",
+                options: [
+                    "<a href='http://www.example.com'>Example</a>",
+                    "<a url='http://www.example.com'>Example</a>",
+                    "<link>http://www.example.com</link>",
+                    "<a>http://www.example.com</a>"
+                ],
+                correctAnswer: 0,
+                explanation: "The <a> tag with the href attribute is used to create hyperlinks in HTML."
+            },
+            {
+                question: "Which HTML attribute is used to define inline styles?",
+                options: [
+                    "class",
+                    "styles",
+                    "font",
+                    "style"
+                ],
+                correctAnswer: 3,
+                explanation: "The 'style' attribute is used to apply inline CSS styles to HTML elements."
+            },
+            {
+                question: "Which HTML element is used to define important text?",
+                options: [
+                    "<important>",
+                    "<b>",
+                    "<strong>",
+                    "<i>"
+                ],
+                correctAnswer: 2,
+                explanation: "The <strong> element is used to define text with strong importance, typically displayed in bold."
+            },
+            {
+                question: "Which HTML element is used to define emphasized text?",
+                options: [
+                    "<italic>",
+                    "<em>",
+                    "<i>",
+                    "<emphasis>"
+                ],
+                correctAnswer: 1,
+                explanation: "The <em> element is used to define emphasized text, typically displayed in italics."
+            },
+            {
+                question: "What is the correct HTML for inserting an image?",
+                options: [
+                    "<img src='image.jpg' alt='My Image'>",
+                    "<image src='image.jpg' alt='My Image'>",
+                    "<img href='image.jpg' alt='My Image'>",
+                    "<picture src='image.jpg' alt='My Image'>"
+                ],
+                correctAnswer: 0,
+                explanation: "The <img> tag with src and alt attributes is used to embed images in HTML."
+            },
+            {
+                question: "Which HTML element is used to define a table row?",
+                options: [
+                    "<td>",
+                    "<tr>",
+                    "<th>",
+                    "<table-row>"
+                ],
+                correctAnswer: 1,
+                explanation: "The <tr> element defines a row in an HTML table."
+            },
+            {
+                question: "Which HTML element is used to define a list item?",
+                options: [
+                    "<ul>",
+                    "<ol>",
+                    "<li>",
+                    "<list>"
+                ],
+                correctAnswer: 2,
+                explanation: "The <li> element is used to define items in both ordered (<ol>) and unordered (<ul>) lists."
+            },
+            {
+                question: "Which HTML element is used to define a navigation section?",
+                options: [
+                    "<nav>",
+                    "<navigation>",
+                    "<navigate>",
+                    "<menu>"
+                ],
+                correctAnswer: 0,
+                explanation: "The <nav> element is used to define a set of navigation links."
+            }
+        ];
+
+        // Quiz State
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let score = 0;
+        let quizSubmitted = false;
+
+        // Initialize the quiz
+        function initializeQuiz() {
+            displayQuestion();
+            updateNavigation();
+        }
+
+        // Display current question
+        function displayQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            
+            // Update progress text
+            document.getElementById('progressText').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+            
+            // Update question text
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Update options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                
+                // If user has already selected this option, mark it as selected
+                if (userAnswers[currentQuestionIndex] === index) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Hide feedback
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // Select an option
+        function selectOption(optionIndex) {
+            if (quizSubmitted) return;
+            
+            // Remove selected class from all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            options[optionIndex].classList.add('selected');
+            
+            // Store user's answer
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Enable next button if not already enabled
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // Navigate to next question
+        function nextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+                updateNavigation();
+            }
+        }
+
+        // Navigate to previous question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+                updateNavigation();
+            }
+        }
+
+        // Update navigation buttons
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Previous button
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            // Next/Submit button
+            if (currentQuestionIndex === quizQuestions.length - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+            
+            // Enable/disable next button based on whether user has selected an answer
+            nextBtn.disabled = userAnswers[currentQuestionIndex] === null;
+        }
+
+        // Submit the quiz
+        function submitQuiz() {
+            quizSubmitted = true;
+            calculateScore();
+            showResults();
+        }
+
+        // Calculate final score
+        function calculateScore() {
+            score = 0;
+            quizQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    score++;
+                }
+            });
+        }
+
+        // Show results
+        function showResults() {
+            // Hide quiz section, show results section
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Display final score
+            document.getElementById('finalScore').textContent = `${score}/${quizQuestions.length}`;
+            
+            // Display result message
+            const percentage = (score / quizQuestions.length) * 100;
+            let message = '';
+            
+            if (percentage >= 90) {
+                message = 'Outstanding! You have mastered HTML fundamentals! 🎉';
+            } else if (percentage >= 70) {
+                message = 'Great job! You have a solid understanding of HTML! 👍';
+            } else if (percentage >= 50) {
+                message = 'Good effort! Keep practicing to improve your skills! 💪';
+            } else {
+                message = 'Keep learning! Review the basics and try again! 📚';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
+            
+            // Save score to localStorage
+            saveScore();
+        }
+
+        // Save score to localStorage
+        // Improved Save Score function - Add this to all quiz files
+function saveScore() {
+    const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    console.log("Saving score for user:", user);
+    
+    if (user && user.email) {
+        // Update session storage first (for immediate dashboard update)
+        if (!user.scores) user.scores = {};
+        user.scores[quizType] = Math.max(user.scores[quizType] || 0, score);
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+        console.log("Updated session storage:", user);
+        
+        // Update localStorage (for permanent storage, skip for guests)
+        if (!user.isGuest) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.email === user.email);
+            
+            if (userIndex !== -1) {
+                if (!users[userIndex].scores) {
+                    users[userIndex].scores = {};
+                }
+                users[userIndex].scores[quizType] = Math.max(
+                    users[userIndex].scores[quizType] || 0,
+                    score
+                );
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log("Updated localStorage:", users[userIndex]);
+            }
+        }
+    }
+}
+
+        // Restart the quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(quizQuestions.length).fill(null);
+            score = 0;
+            quizSubmitted = false;
+            
+            // Show quiz section, hide results section
+            document.getElementById('quizSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Reset UI
+            document.getElementById('currentScore').textContent = '0';
+            initializeQuiz();
+        }
+
+        // Initialize the quiz when page loads
+        document.addEventListener('DOMContentLoaded', initializeQuiz);
+    </script>
+</body>
+</html>
